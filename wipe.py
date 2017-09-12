@@ -15,10 +15,8 @@ class Annotate:
         self.count = 1
 
     def process_video(self):
+        total = 0
         video = cv2.VideoCapture(self.filename_ext)
-        print('loaded video {}'.format(self.filename))
-
-        cv2.namedWindow('video {}'.format(self.filename))
 
         ter, lastFrame = video.read()
         lastFrame = cv2.cvtColor(lastFrame, cv2.COLOR_BGR2GRAY)
@@ -33,43 +31,25 @@ class Annotate:
             #we can modify self.frame here and it will show up!
             diff = cv2.absdiff(self.frame, lastFrame)
 
-            #use diff
-            #filter out non black objects
-
-
-            #grayscale
-
-            #what do I need to do to get data to sami
-
-            #apply threashold
-            #calculate number of non zeros
-            #if number is above another threashold
-                #framecount ++
-
-            #return framecount and weather it is in the set
-
-
             lastFrame = self.frame
-            subframe = diff[200:201, 0:1920]
 
-            thresh = 127
-            v_bw = cv2.threshold(im_gray, thresh, 255, cv2.THRESH_BINARY)[1]
+            #blurred = cv2.GaussianBlur(diff.copy(), (17, 17), 0)
 
-            print(np.average(subframe))
-            cv2.imshow('window', diff)
-            cv2.imshow('video {}'.format(self.filename), subframe)
+            thresh = 140
+            bw = cv2.threshold(diff, thresh, 255, cv2.THRESH_BINARY)[1]
 
-            key = cv2.waitKey(0) & 0xFF
-            if key == ord('h'):
-                 plt.hist(subframe.ravel(), 256, [0, 256])
-                 plt.show()
-
-            elif key == ord('q'):
-                 exit()
+            if np.average(bw) > 2:
+                total += np.average(bw)
+            print(np.average(bw))
 
             frame_number += 1
+            if frame_number == 300:
+                break
 
-        cv2.destroyAllWindows()
+        print(total)
+        if total > 105:
+            return True
+        return False
 
 
 if __name__ == '__main__':
